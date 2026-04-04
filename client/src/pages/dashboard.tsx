@@ -27,6 +27,9 @@ export default function Dashboard() {
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [actorFilter, setActorFilter] = useState<string>("all");
 
+  // Auto-refresh all data every 5 minutes to keep dashboard current
+  const refetchConfig = { refetchInterval: 5 * 60 * 1000, staleTime: 2 * 60 * 1000 };
+
   const { data: stats, isLoading: statsLoading } = useQuery<{
     totalEvents: number;
     totalKilled: number;
@@ -35,10 +38,12 @@ export default function Dashboard() {
     lastUpdated: string;
   }>({
     queryKey: ["/api/stats"],
+    ...refetchConfig,
   });
 
   const { data: allEvents, isLoading: eventsLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
+    ...refetchConfig,
   });
 
   const { data: casualtySummary } = useQuery<{
@@ -49,6 +54,7 @@ export default function Dashboard() {
     civilianKilled: number;
   }[]>({
     queryKey: ["/api/casualties/summary"],
+    ...refetchConfig,
   });
 
   // Apply filters locally for instant response
