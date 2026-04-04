@@ -1,74 +1,85 @@
 # Iran War Tracker — Operation Epic Fury COP
 
-A full-stack real-time conflict intelligence platform tracking the 2026 Iran War (Operation Epic Fury). Built as a Common Operating Picture (COP) with an interactive map, event timeline, casualty analytics, infrastructure damage tracking, live GDELT news intelligence feed, and economic impact monitoring (oil prices + Strait of Hormuz shipping status).
+> A real-time conflict intelligence platform with live geospatial maps and analytics, designed to visualize the humanitarian, operational, and economic impact of the 2026 Iran conflict (Operation Epic Fury). Built as a data collection and labeling layer for training ML classifiers and RAG systems on real-world OSINT data.
 
-![Tech Stack](https://img.shields.io/badge/React-18-blue) ![Tech Stack](https://img.shields.io/badge/TypeScript-5-blue) ![Tech Stack](https://img.shields.io/badge/Express-4-green) ![Tech Stack](https://img.shields.io/badge/SQLite-3-lightgrey) ![Tech Stack](https://img.shields.io/badge/MapLibre_GL-4-orange) ![Tech Stack](https://img.shields.io/badge/Recharts-2-purple) ![Tech Stack](https://img.shields.io/badge/GDELT_API-live-red)
+![Status](https://img.shields.io/badge/Phase_1-Complete-brightgreen) ![Status](https://img.shields.io/badge/Phase_2-In_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-blue)
+
+**Stack:** React 18 / TypeScript / Express / SQLite / MapLibre GL / Recharts / GDELT API
 
 ---
 
 ## Screenshots
 
-### Main Dashboard — Map + Timeline
+### Dashboard Overview — Interactive Map + Event Timeline
+Severity-coded markers on a dark COP-style map. Click any marker for event details, source attribution, and links. Filter by category, country, or actor.
+
 ![Dashboard Map View](screenshots/dashboard-map.png)
 
 ### GDELT Live Intelligence Feed
+Real-time articles from the GDELT Project API, monitoring news in 100+ languages. Server-side caching (15-min TTL) respects GDELT's rate limits while serving multiple users.
+
 ![GDELT Intel Feed](screenshots/gdelt-intel.png)
 
 ### Oil Price Gauge + Strait of Hormuz Shipping Monitor
+Brent crude price against the US economy's "Goldilocks zone" ($60-$90/bbl). Green = optimal, yellow = strain, red = crisis. Daily Hormuz transit chart shows the shipping blockade's impact.
+
 ![Economic Impact](screenshots/economic-impact.png)
 
 ### Casualty Analytics
+Breakdowns by side, military vs civilian, daily trends. Bar and donut charts with a detail table showing killed, wounded, military KIA, and civilian KIA per side.
+
 ![Casualty Charts](screenshots/casualties.png)
 
 ### Infrastructure Damage
+Categorized damage reports (residential, military, medical, school, commercial, humanitarian) with country-level rollups and individual incident tracking.
+
 ![Infrastructure Damage](screenshots/damage.png)
 
 ---
 
 ## What Makes This Different
 
-Most Iran war trackers (Al Jazeera, NYT, WaPo) are static news pages with timelines. This project is different:
+Most Iran war trackers are static news pages. This is an interactive intelligence platform:
 
-| Feature | News Sites | This Dashboard |
-|---------|-----------|----------------|
-| Interactive geospatial map | No | Yes — MapLibre GL with severity-coded markers |
-| Live data ingestion | Manual updates | GDELT API — auto-refreshes every 15 min, monitors 100+ languages |
-| Economic impact correlation | Separate articles | Integrated — oil price gauge with US economy "Goldilocks zone," Hormuz shipping status |
-| Casualty analytics | Total numbers | Breakdowns by side, military vs civilian, daily trends, bar/pie charts |
-| Infrastructure damage | Mentioned in articles | Categorized (residential, military, medical, school) with country-level rollups |
-| Filterable | No | By category, country, and actor |
-| Open source | No | Full codebase on GitHub |
-| ML-ready data pipeline | No | Structured event data designed for training classifiers and RAG systems |
+**Live Data Ingestion**
+- GDELT API monitors global news in 100+ languages, auto-refreshes every 15 minutes
+- Server-side caching prevents rate limiting while serving multiple concurrent users
 
-### Why This Matters for AI/ML
+**Analytical Depth**
+- Casualty breakdowns by side, military vs civilian, with daily trend charts
+- Infrastructure damage categorized by type with country-level aggregation
+- Oil price correlation with conflict events on the same timeline
 
-This dashboard is the **data collection and visualization layer** for a larger AI engineering project:
+**Economic Impact**
+- Brent crude gauge with inflation-adjusted "acceptable range" for the US economy
+- Strait of Hormuz daily transit counts, stranded vessels, war risk insurance multiplier
+- Oil price history annotated with key conflict events
 
-1. **Phase 1 (Complete):** Full-stack dashboard with live data ingestion from GDELT
-2. **Phase 2 (Next):** Train a text classifier (scikit-learn → PyTorch) to auto-classify incoming GDELT articles by event type, severity, and actor
-3. **Phase 3:** Build a RAG (Retrieval-Augmented Generation) system using ChromaDB + LangChain so users can ask natural language questions about the conflict
-4. **Phase 4:** Docker containerization + CI/CD pipeline
+**Filterable and Interactive**
+- Filter all data by event category (airstrike, missile, drone, etc.), country, and actor
+- Map markers with click-through popups showing event details and source links
 
-The structured event data (57+ labeled events with categories, severity, actors, coordinates) serves as **training data** for the ML models in Phase 2.
+**ML-Ready Data Pipeline**
+- 57+ hand-labeled events serve as supervised training data for Phase 2 classifiers
+- Every GDELT article is an inference candidate for auto-classification
+- Structured schema designed for embedding and RAG retrieval
 
 ---
 
-## Overview
+## Core Purpose — AI/ML Engineering
 
-This application aggregates open-source intelligence (OSINT) data from multiple reporting agencies into a single-pane-of-glass dashboard for tracking the ongoing Iran conflict.
+This project exists to learn and demonstrate AI/ML engineering skills. The dashboard is the **data collection and labeling layer** that feeds into a machine learning pipeline.
 
-**Key capabilities:**
+**The point is not the dashboard — the point is training AI on real-world data.**
 
-- **Interactive conflict map** — MapLibre GL JS with severity-coded markers, popups with event details, and source attribution
-- **Event timeline** — Chronological feed grouped by date with category/severity/actor filtering
-- **Casualty analytics** — Bar charts, donut charts (killed by side, military vs civilian), daily killed timeline, breakdown tables
-- **Infrastructure damage tracking** — Horizontal bar charts by category, country-level breakdowns, individual damage reports
-- **GDELT Live Intelligence Feed** — Real-time article monitoring from GDELT Project API, auto-refreshes every 15 minutes, covers 100+ languages globally
-- **Oil Price Impact Gauge** — Brent crude price against an inflation-adjusted "acceptable range" for the US economy ($60-$90 optimal, $90-$110 elevated, $110+ crisis)
-- **Strait of Hormuz Monitor** — Daily ship transit counts, stranded vessel count, war risk insurance multiplier, blockade status
-- **Filtering engine** — Filter by event category (airstrike, missile, drone, etc.), country, and actor
-- **Auto-refresh** — All data endpoints poll every 5 minutes; GDELT polls every 15 minutes
-- **RESTful API** — Full backend with aggregation endpoints for stats, casualty summaries, infrastructure summaries, GDELT proxy, oil prices, and Hormuz shipping data
+The dashboard makes the data visible and the pipeline auditable. Every labeled event is a training example. Every GDELT article is an inference candidate. Every API endpoint is a serving layer for model predictions.
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| Phase 1 | Dashboard + live data ingestion | Complete |
+| Phase 2 | ML text classifier (scikit-learn → PyTorch) | In Progress |
+| Phase 3 | RAG system (ChromaDB + LangChain) | Planned |
+| Phase 4 | Cloud deployment + CI/CD | Planned |
 
 ---
 
@@ -77,16 +88,14 @@ This application aggregates open-source intelligence (OSINT) data from multiple 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Frontend** | React 18, TypeScript | UI framework, type safety |
-| **Styling** | Tailwind CSS v3, shadcn/ui | Component library, dark theme |
-| **Maps** | MapLibre GL JS | Interactive vector map rendering |
-| **Charts** | Recharts | Data visualization (bar, pie, area, line) |
-| **Routing** | Wouter | Lightweight hash-based SPA routing |
-| **State** | TanStack React Query | Server state management, caching, auto-refresh |
-| **Backend** | Express.js, TypeScript | REST API server |
-| **Database** | SQLite + Drizzle ORM | Lightweight relational DB with type-safe queries |
-| **Validation** | Zod + drizzle-zod | Schema validation for API inputs |
-| **Build** | Vite | Fast dev server and production bundler |
-| **Live Data** | GDELT Project API | Global news monitoring (100+ languages, 15-min updates) |
+| **Styling** | Tailwind CSS v3, shadcn/ui | Component library, dark COP theme |
+| **Maps** | MapLibre GL JS | Interactive vector map with custom markers |
+| **Charts** | Recharts | Bar, pie, area, and line charts for analytics |
+| **State** | TanStack React Query | Server state management with auto-refresh polling |
+| **Backend** | Express.js, TypeScript | REST API server with GDELT proxy caching |
+| **Database** | SQLite + Drizzle ORM | Type-safe relational DB with Zod validation |
+| **Build** | Vite | Fast dev server with hot module replacement |
+| **Live Data** | GDELT Project API | Global event monitoring (100+ languages, 15-min updates) |
 
 ---
 
@@ -101,28 +110,34 @@ This application aggregates open-source intelligence (OSINT) data from multiple 
 │  └──────────┘  └──────────┘  └─────────────────────┘  │
 │         │            │              │                  │
 │         └────────────┼──────────────┘                  │
-│                      │ TanStack Query (auto-refresh)   │
+│                      │                                 │
+│          TanStack Query (auto-refresh)                 │
+│          Stats/Events: 5-min poll                      │
+│          GDELT: 15-min poll                            │
 │                      ▼                                 │
 │              fetch("./api/...")                         │
 └──────────────────────┬────────────────────────────────┘
                        │ HTTP
 ┌──────────────────────┴────────────────────────────────┐
 │                  Server (Express)                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │ /api/stats    │  │ /api/events  │  │/api/casualties│ │
-│  │ /api/infra    │  │ /api/gdelt/* │  │/api/oil-price │ │
-│  │ /api/hormuz   │  │              │  │               │ │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬────────┘ │
-│         └─────────────────┼─────────────────┘          │
-│                    ┌──────┴──────┐                      │
-│                    │ Drizzle ORM │  GDELT API (proxy)   │
-│                    └──────┬──────┘                      │
-│                           ▼                             │
-│                   SQLite (data.db)                      │
-│         ┌──────────────────────────────┐               │
-│         │ events | casualties |         │               │
-│         │ infrastructure                │               │
-│         └──────────────────────────────┘               │
+│                                                        │
+│  Local Data          External Data                     │
+│  ┌──────────────┐    ┌──────────────────┐             │
+│  │ /api/stats    │    │ /api/gdelt/*     │             │
+│  │ /api/events   │    │ (15-min cache)   │             │
+│  │ /api/casualties│    │ Proxies to GDELT │             │
+│  │ /api/infra    │    │ API to avoid     │             │
+│  │ /api/oil-price│    │ CORS + rate      │             │
+│  │ /api/hormuz   │    │ limits           │             │
+│  └──────┬───────┘    └──────────────────┘             │
+│         │ Drizzle ORM                                  │
+│         ▼                                              │
+│  SQLite (data.db)                                      │
+│  ┌────────────────────────────────────┐               │
+│  │ events (57+ labeled)               │               │
+│  │ casualties (daily snapshots/side)   │               │
+│  │ infrastructure (damage by category) │               │
+│  └────────────────────────────────────┘               │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -130,19 +145,19 @@ This application aggregates open-source intelligence (OSINT) data from multiple 
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/stats` | Dashboard KPIs (total events, killed, wounded, countries) |
-| `GET` | `/api/events` | All events, filterable by `category`, `country`, `actor`, `startDate`, `endDate` |
-| `GET` | `/api/events/:id` | Single event by ID |
-| `GET` | `/api/casualties` | Casualty records, filterable by `country`, `side` |
-| `GET` | `/api/casualties/summary` | Aggregated casualties by side |
-| `GET` | `/api/infrastructure` | Infrastructure damage records |
-| `GET` | `/api/infrastructure/summary` | Aggregated damage by category and country |
-| `GET` | `/api/gdelt/articles` | Live GDELT articles (proxied, no CORS issues) |
-| `GET` | `/api/gdelt/tone` | GDELT sentiment/tone timeline (past 7 days) |
-| `GET` | `/api/oil-price` | Brent crude price, history, and US economy acceptable range |
-| `GET` | `/api/hormuz` | Strait of Hormuz shipping status, transit counts, stranded vessels |
+| Method | Endpoint | Description | Example Query |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/stats` | Dashboard KPIs | — |
+| `GET` | `/api/events` | All events with filters | `?category=airstrike&country=Iran&actor=US` |
+| `GET` | `/api/events/:id` | Single event by ID | `/api/events/42` |
+| `GET` | `/api/casualties` | Casualty records | `?side=Iran&country=Iran` |
+| `GET` | `/api/casualties/summary` | Aggregated by side | — |
+| `GET` | `/api/infrastructure` | Damage records | `?country=Iran&category=military` |
+| `GET` | `/api/infrastructure/summary` | Aggregated by category/country | — |
+| `GET` | `/api/gdelt/articles` | Live GDELT articles (cached 15 min) | — |
+| `GET` | `/api/gdelt/tone` | Sentiment timeline (past 7 days) | — |
+| `GET` | `/api/oil-price` | Brent crude + acceptable range | — |
+| `GET` | `/api/hormuz` | Strait of Hormuz shipping status | — |
 
 ---
 
@@ -154,7 +169,7 @@ This application aggregates open-source intelligence (OSINT) data from multiple 
 - **npm** (comes with Node.js)
 - **Git** ([download](https://git-scm.com/downloads))
 
-### Installation
+### First-Time Setup
 
 ```bash
 # Clone the repository
@@ -164,10 +179,10 @@ cd iran-war-tracker
 # Install dependencies
 npm install
 
-# Push database schema
+# Initialize the database (creates tables)
 npx drizzle-kit push
 
-# Start development server
+# Start development server (seeds data automatically on first run)
 npm run dev
 ```
 
@@ -175,25 +190,29 @@ The app will be running at `http://localhost:3000`.
 
 ### Windows Users
 
-This project uses `cross-env` for Windows compatibility. If you see `NODE_ENV is not recognized`, run `npm install cross-env` and ensure the `package.json` scripts use `cross-env` before `NODE_ENV`.
+This project uses `cross-env` for Windows compatibility. The `package.json` scripts are already configured. If you encounter `NODE_ENV is not recognized`, ensure `cross-env` is installed:
+
+```bash
+npm install cross-env
+```
 
 ### Refreshing Data
 
-To update the dashboard with new event data:
+To update the dashboard with new event data, delete the database and restart:
 
 ```bash
-# Delete the old database
-del data.db          # Windows
-rm data.db           # Mac/Linux
-
-# Recreate schema
+# Windows
+del data.db
 npx drizzle-kit push
+npm run dev
 
-# Restart the server
+# Mac/Linux
+rm data.db
+npx drizzle-kit push
 npm run dev
 ```
 
-The seed data loads automatically on first server start.
+The seed data loads automatically when the server starts with an empty database.
 
 ---
 
@@ -203,7 +222,7 @@ The seed data loads automatically on first server start.
 iran-war-tracker/
 ├── client/                  # Frontend (React + TypeScript)
 │   ├── src/
-│   │   ├── components/      # Reusable UI components
+│   │   ├── components/
 │   │   │   ├── conflict-map.tsx        # MapLibre GL interactive map
 │   │   │   ├── event-timeline.tsx      # Chronological event feed
 │   │   │   ├── casualty-chart.tsx      # Casualty analytics + charts
@@ -212,24 +231,18 @@ iran-war-tracker/
 │   │   │   └── economic-impact.tsx     # Oil gauge + Hormuz shipping
 │   │   ├── pages/
 │   │   │   └── dashboard.tsx           # Main dashboard layout (5 tabs)
-│   │   ├── lib/
-│   │   │   └── queryClient.ts          # TanStack Query config
-│   │   ├── App.tsx                     # Root component + routing
-│   │   └── index.css                   # Tailwind + dark theme
+│   │   └── index.css                   # Tailwind + dark COP theme
 │   └── index.html
-├── server/                  # Backend (Express + TypeScript)
-│   ├── routes.ts            # API routes (events, GDELT, oil, Hormuz)
+├── server/
+│   ├── routes.ts            # API routes + GDELT proxy with caching
 │   ├── storage.ts           # Database queries (Drizzle ORM)
 │   ├── seed.ts              # Conflict data seeding (57+ events)
 │   └── index.ts             # Express server entry point
 ├── shared/
-│   └── schema.ts            # Database schema (Drizzle) + Zod types
+│   └── schema.ts            # Database schema + Zod validation types
 ├── pipeline/                # (Phase 2) ML classification pipeline
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-├── vite.config.ts
-└── drizzle.config.ts
+├── screenshots/             # Dashboard screenshots for documentation
+└── package.json
 ```
 
 ---
@@ -238,32 +251,34 @@ iran-war-tracker/
 
 All data is sourced from publicly available OSINT reporting:
 
-- **CENTCOM** — US Central Command official statements and strike counts
-- **HRANA** — Human Rights Activists News Agency (civilian casualty documentation)
-- **Hengaw Organization** — Kurdish human rights organization
-- **Critical Threats (AEI/ISW)** — Daily Iran war updates with detailed military analysis
-- **Al Jazeera** — Live casualty tracker and reporting
-- **Reuters** — Wire service reporting
-- **IDF** — Israel Defense Forces official statements
-- **GDELT Project** — Global Database of Events, Tone, and Language (real-time, 100+ languages)
-- **Jerusalem Post** — Israeli media reporting
-- **Washington Post** — Investigative reporting on civilian casualties
-- **Military Times / NBC News / CBS News** — US military and policy reporting
+| Source | Type | Coverage |
+|--------|------|----------|
+| **CENTCOM** | Official statements | US strike counts, operational updates |
+| **HRANA** | Human rights NGO | Civilian casualty documentation |
+| **Hengaw Organization** | Kurdish human rights | Military casualty estimates |
+| **Critical Threats (AEI/ISW)** | Think tank | Daily military analysis, maps |
+| **Al Jazeera** | News | Live casualty tracker, regional reporting |
+| **Reuters** | Wire service | Breaking news, verified reports |
+| **IDF** | Official statements | Israeli military operations |
+| **GDELT Project** | Academic/API | Global news monitoring, 100+ languages, real-time |
+| **Military Times / NBC / CBS** | US media | Military policy, casualty updates |
 
 ---
 
 ## Roadmap
 
-### Completed
+### Phase 1 — Dashboard + Data Ingestion (Complete)
 - [x] Interactive conflict map with severity-coded markers
 - [x] Event timeline with date grouping and filtering
-- [x] Casualty analytics (bar charts, pie charts, breakdowns)
-- [x] Infrastructure damage tracking
+- [x] Casualty analytics (bar charts, pie charts, breakdowns by side)
+- [x] Infrastructure damage tracking (categorized with country rollups)
 - [x] GDELT live intelligence feed (auto-refresh every 15 min)
 - [x] Oil price gauge with US economy impact zones
 - [x] Strait of Hormuz shipping status monitor
-- [x] Auto-refresh all data endpoints
+- [x] Server-side GDELT caching to respect API rate limits (15-min TTL)
+- [x] Auto-refresh all data endpoints (5-min polling)
 - [x] GitHub repository with professional documentation
+- [x] Windows compatibility (cross-env, Node v24 reusePort fix)
 
 ### Phase 2 — ML Pipeline (In Progress)
 - [ ] Python event classifier (scikit-learn → PyTorch)
@@ -278,10 +293,23 @@ All data is sourced from publicly available OSINT reporting:
 - [ ] Citation-backed AI-generated answers
 
 ### Phase 4 — Production
+- [ ] Cloud deployment via Railway.app (persistent uptime for live GDELT feed)
 - [ ] Docker containerization
 - [ ] GitHub Actions CI/CD pipeline
-- [ ] Cloud deployment
 - [ ] Live data API integration (EIA oil prices, MarineTraffic shipping)
+
+---
+
+## Contributing
+
+Contributions are welcome. Areas where help is most valuable:
+
+- **Adding GDELT event sources** — Expanding query coverage to capture more conflict-related articles
+- **Improving the ML classifier** (Phase 2) — Feature engineering, model architecture suggestions
+- **Live data API integration** — Connecting real-time EIA oil price or MarineTraffic shipping APIs
+- **Testing and bug reports** — Especially cross-browser and mobile layout issues
+
+For major changes, please open an issue first to discuss what you would like to change.
 
 ---
 
@@ -290,12 +318,7 @@ All data is sourced from publicly available OSINT reporting:
 **Austin Wesley**
 - GitHub: [@Nominal-Ninja](https://github.com/Nominal-Ninja)
 - Project: Part of an 18-month AI Engineer development portfolio
-
----
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+- Focus: Data engineering → AI/ML engineering → AI architecture
 
 ---
 

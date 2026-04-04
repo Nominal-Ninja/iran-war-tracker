@@ -4,6 +4,10 @@
  * All routes are prefixed with /api and use the storage interface
  * for database operations via Drizzle ORM.
  *
+ * GDELT endpoints use server-side caching (15-min TTL) to respect
+ * GDELT's rate limit of 1 request per 5 seconds. This ensures the
+ * dashboard can serve multiple users without hitting API throttling.
+ *
  * Author: Austin Wesley
  */
 import type { Express } from "express";
@@ -79,32 +83,61 @@ export async function registerRoutes(
   // =============================================
   // GDELT LIVE INTELLIGENCE FEED
   // Proxies requests to GDELT's free API to avoid CORS issues.
+  // Server-side cache with 15-min TTL prevents rate limiting.
+  // GDELT limits requests to 1 per 5 seconds — caching ensures
+  // multiple dashboard users don't trigger throttling.
   // Returns latest English-language articles about the Iran conflict.
   // Author: Austin Wesley
   // =============================================
+
+  // GDELT cache — only hit the API once every 15 minutes to avoid rate limits
+  let gdeltCache: { data: any; timestamp: number } | null = null;
+  const GDELT_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
   app.get("/api/gdelt/articles", async (_req, res) => {
     try {
+      // Return cached data if still fresh
+      if (gdeltCache && Date.now() - gdeltCache.timestamp < GDELT_CACHE_TTL) {
+        return res.json(gdeltCache.data);
+      }
+
       const query = encodeURIComponent("Iran war strike missile sourcelang:english");
       const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=artlist&maxrecords=25&format=json&timespan=1d`;
       const response = await fetch(url);
       const data = await response.json();
+
+      // Cache the result
+      gdeltCache = { data, timestamp: Date.now() };
+
       res.json(data);
     } catch (error) {
       console.error("GDELT API error:", error);
+      // Return cached data if available, even if stale
+      if (gdeltCache) return res.json(gdeltCache.data);
       res.status(500).json({ error: "Failed to fetch GDELT data" });
     }
   });
 
   // GDELT tone/sentiment timeline — shows media sentiment over past 7 days
+  let gdeltToneCache: { data: any; timestamp: number } | null = null;
+
   app.get("/api/gdelt/tone", async (_req, res) => {
     try {
+      if (gdeltToneCache && Date.now() - gdeltToneCache.timestamp < GDELT_CACHE_TTL) {
+        return res.json(gdeltToneCache.data);
+      }
+
       const query = encodeURIComponent("Iran war sourcelang:english");
       const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=timelinetone&format=json&timespan=7d`;
       const response = await fetch(url);
       const data = await response.json();
+
+      gdeltToneCache = { data, timestamp: Date.now() };
+
       res.json(data);
     } catch (error) {
       console.error("GDELT tone API error:", error);
+      if (gdeltToneCache) return res.json(gdeltToneCache.data);
       res.status(500).json({ error: "Failed to fetch GDELT tone data" });
     }
   });
