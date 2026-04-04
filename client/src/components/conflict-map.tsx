@@ -110,7 +110,14 @@ export function ConflictMap({ events }: ConflictMapProps) {
         border: 2px solid rgba(255,255,255,0.3);
         cursor: pointer;
         box-shadow: 0 0 ${size}px ${color}80;
+        transition: transform 0.15s ease;
       `;
+      el.addEventListener("mouseenter", () => {
+        el.style.transform = "scale(1.3)";
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "scale(1)";
+      });
 
       const popupContent = `
         <div style="max-width: 280px;">

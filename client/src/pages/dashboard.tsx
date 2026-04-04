@@ -2,7 +2,7 @@
  * dashboard.tsx
  * Main dashboard layout for the Iran War Tracker COP.
  * Renders KPI strip, filter bar, interactive map, and tabbed panels
- * (timeline, casualties, infrastructure damage).
+ * (timeline, casualties, infrastructure damage, GDELT intel feed, economic impact).
  *
  * Author: Austin Wesley
  */
@@ -14,11 +14,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skull, Crosshair, Building2, Globe, Activity, AlertTriangle, Shield, Clock } from "lucide-react";
+import { Skull, Crosshair, Building2, Globe, Activity, AlertTriangle, Shield, Clock, Newspaper, Fuel } from "lucide-react";
 import { ConflictMap } from "@/components/conflict-map";
 import { EventTimeline } from "@/components/event-timeline";
 import { CasualtyChart } from "@/components/casualty-chart";
 import { InfrastructurePanel } from "@/components/infrastructure-panel";
+import { GdeltFeed } from "@/components/gdelt-feed";
+import { EconomicImpact } from "@/components/economic-impact";
 
 export default function Dashboard() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -182,10 +184,10 @@ export default function Dashboard() {
           <ConflictMap events={mapEvents} />
         </div>
 
-        {/* Right panel — 40% */}
+        {/* Right panel — 40% with 5 tabs */}
         <div className="w-[40%] border-l border-border flex flex-col overflow-hidden" data-testid="right-panel">
           <Tabs defaultValue="timeline" className="flex flex-col flex-1 overflow-hidden">
-            <TabsList className="mx-3 mt-2 grid grid-cols-3 h-8">
+            <TabsList className="mx-3 mt-2 grid grid-cols-5 h-8">
               <TabsTrigger value="timeline" className="text-xs" data-testid="tab-timeline">
                 <Activity className="w-3.5 h-3.5 mr-1" /> Timeline
               </TabsTrigger>
@@ -194,6 +196,12 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger value="infrastructure" className="text-xs" data-testid="tab-infrastructure">
                 <Building2 className="w-3.5 h-3.5 mr-1" /> Damage
+              </TabsTrigger>
+              <TabsTrigger value="intel" className="text-xs" data-testid="tab-intel">
+                <Newspaper className="w-3.5 h-3.5 mr-1" /> Intel
+              </TabsTrigger>
+              <TabsTrigger value="economic" className="text-xs" data-testid="tab-economic">
+                <Fuel className="w-3.5 h-3.5 mr-1" /> Oil
               </TabsTrigger>
             </TabsList>
 
@@ -208,13 +216,21 @@ export default function Dashboard() {
             <TabsContent value="infrastructure" className="flex-1 overflow-y-auto m-0 px-3 pb-3">
               <InfrastructurePanel />
             </TabsContent>
+
+            <TabsContent value="intel" className="flex-1 overflow-y-auto m-0 px-3 pb-3">
+              <GdeltFeed />
+            </TabsContent>
+
+            <TabsContent value="economic" className="flex-1 overflow-y-auto m-0 px-3 pb-3">
+              <EconomicImpact />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="px-4 py-1.5 border-t border-border bg-card text-xs text-muted-foreground flex items-center justify-between">
-        <span>Data sourced from CENTCOM, HRANA, Al Jazeera, Reuters, IDF, Hengaw Organization. For informational purposes only.</span>
+        <span>Data: CENTCOM, HRANA, Al Jazeera, Reuters, IDF, GDELT, EIA. For informational purposes only.</span>
         <span>Built by Austin Wesley</span>
       </footer>
     </div>
