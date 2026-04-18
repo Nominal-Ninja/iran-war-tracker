@@ -2,9 +2,20 @@
 set -e
 
 # Path to the SQLite file — defaults to the persistent volume mount.
-# Both drizzle.config.ts and server/storage.ts read DB_PATH directly,
-# so no symlink hackery is needed.
+# Both drizzle.config.ts and server/storage.ts read DB_PATH directly.
 export DB_PATH="${DB_PATH:-/data/data.db}"
+DB_DIR="$(dirname "$DB_PATH")"
+
+# If we're running as root (first boot on Railway — volumes are mounted
+# with root ownership), fix the data dir and re-exec as nodejs via gosu.
+# If we're already nodejs (local `docker run --user` etc), skip straight
+# to the app logic.
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p "$DB_DIR"
+  chown -R nodejs:nodejs "$DB_DIR"
+  # Re-run this same script as the nodejs user
+  exec gosu nodejs:nodejs "$0" "$@"
+fi
 
 echo "[entrypoint] using DB at $DB_PATH"
 
