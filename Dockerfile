@@ -64,9 +64,12 @@ COPY --from=builder --chown=nodejs:nodejs /app/server/seed.ts ./server/seed.ts
 COPY --chown=nodejs:nodejs docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Persistent volume for the SQLite file (mount in Railway/Fly)
+# Persistent storage for the SQLite file. Note: we intentionally do NOT use
+# the `VOLUME` Dockerfile keyword here — Railway rejects it (their builder
+# requires volumes to be declared in the Railway UI instead). Fly.io and
+# raw Docker users should attach a volume at /data via their own mechanism
+# (fly.toml [mounts] or `docker run -v`).
 RUN mkdir -p /data && chown nodejs:nodejs /data
-VOLUME ["/data"]
 
 USER nodejs
 EXPOSE 3000
