@@ -1,0 +1,38 @@
+# .trivyignore — Vulnerability Exploitability eXchange (VEX) decisions
+#
+# Each CVE below has been analyzed and documented as not exploitable in this
+# runtime. Format per Trivy docs: one CVE ID per line, inline comments allowed.
+# Review cadence: re-check on every drizzle-kit / esbuild bump, or quarterly,
+# whichever comes first.
+#
+# --- Group: esbuild Go stdlib CVEs (8 total: 1 CRITICAL, 7 HIGH) -----------
+# Source: all 8 CVEs are in the Go standard library statically linked into
+# the `esbuild` binary at node_modules/@esbuild/linux-x64/bin/esbuild.
+# esbuild is pulled in as a transitive dep of `drizzle-kit`, which the
+# runtime image invokes exactly once at container boot to apply a hand-
+# authored schema to a fresh SQLite file via `drizzle-kit push`.
+#
+# Exploitability analysis — shared across all 8 CVEs in this group:
+#   - esbuild does not open network sockets at runtime in this usage
+#     (no TLS connections → crypto/tls and crypto/x509 CVEs unreachable)
+#   - esbuild does not parse TAR or ZIP archives in this usage
+#     (archive/tar and archive/zip CVEs unreachable)
+#   - esbuild does not parse URLs from untrusted input in this usage
+#     (net/url CVEs unreachable)
+#   - esbuild does not chmod directories outside /app in this usage
+#     (syscall/unix Root.Chmod CVE unreachable)
+#   - Input to esbuild is limited to our own schema file (shared/schema.ts)
+#     which is built into the image at build time, not supplied at runtime.
+#
+# Remediation path: drizzle-kit publishes a version built against Go >=1.25.7,
+# OR we refactor to generate SQL migrations at build time and drop the
+# drizzle-kit runtime dependency entirely. Tracked for a future PR.
+
+CVE-2025-68121  # crypto/tls: incorrect cert validation during TLS session resumption — esbuild makes no TLS connections at runtime
+CVE-2025-58183  # archive/tar: unbounded allocation parsing GNU sparse map — esbuild does not parse TAR archives
+CVE-2025-61726  # net/url: memory exhaustion in query parameter parsing — esbuild receives no untrusted URLs
+CVE-2025-61728  # archive/zip: excessive CPU building archive index — esbuild does not build ZIP archives
+CVE-2025-61729  # crypto/x509: DoS via crafted cert — esbuild validates no X.509 certificates
+CVE-2026-25679  # net/url: incorrect IPv6 host literal parsing — esbuild receives no untrusted URLs
+CVE-2026-32280  # crypto/x509: unbounded work during chain building — esbuild validates no X.509 certificates
+CVE-2026-32282  # syscall/unix: Root.Chmod follows symlinks out of root — esbuild does not chmod files at runtime
