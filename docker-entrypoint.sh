@@ -1,14 +1,10 @@
 #!/bin/sh
 set -e
 
-# Path to the SQLite file — defaults to the persistent volume
-DB_PATH="${DB_PATH:-/data/data.db}"
-
-# Symlink the expected path (drizzle.config.ts uses ./data.db) to the volume
-# so both drizzle-kit and the server write to the same persistent location.
-if [ ! -L /app/data.db ] && [ ! -f /app/data.db ]; then
-  ln -sf "$DB_PATH" /app/data.db
-fi
+# Path to the SQLite file — defaults to the persistent volume mount.
+# Both drizzle.config.ts and server/storage.ts read DB_PATH directly,
+# so no symlink hackery is needed.
+export DB_PATH="${DB_PATH:-/data/data.db}"
 
 echo "[entrypoint] using DB at $DB_PATH"
 
