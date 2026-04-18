@@ -54,6 +54,10 @@ WORKDIR /app
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
  && rm -rf /usr/local/lib/node_modules/corepack /usr/local/bin/corepack
 
+# Ensure /app itself is owned by nodejs so the runtime user can create files
+# within it (WORKDIR leaves the dir owned by root by default).
+RUN chown -R nodejs:nodejs /app
+
 # Copy built artifacts + production node_modules + config needed at runtime
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
