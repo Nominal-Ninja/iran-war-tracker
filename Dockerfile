@@ -44,6 +44,13 @@ RUN groupadd --system --gid 1001 nodejs \
 
 WORKDIR /app
 
+# Remove the npm CLI bundled with the Node image. We use `node` directly at
+# runtime (`node dist/index.cjs`), so npm is not needed and its bundled deps
+# (tar/minimatch/glob/cross-spawn/lodash) were flagged by Trivy. Removing
+# ~11 HIGH CVEs in one shot and shrinking the image.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
+ && rm -rf /usr/local/lib/node_modules/corepack /usr/local/bin/corepack
+
 # Copy built artifacts + production node_modules + config needed at runtime
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
