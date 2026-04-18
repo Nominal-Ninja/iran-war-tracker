@@ -32,9 +32,12 @@ ENV NODE_ENV=production \
     PORT=3000 \
     DB_PATH=/data/data.db
 
-# tini for proper signal handling (clean shutdowns)
+# dumb-init is a tiny (~13 KB) pure-C init/signal forwarder. We swapped off
+# tini here because tini's bundled Go stdlib was flagged with 8 CVEs (none
+# actually exploitable in a signal-forwarder's attack surface, but easier
+# to remove the package than justify each CVE).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      tini \
+      dumb-init \
       ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -72,5 +75,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/stats',r=>{process.exit(r.statusCode<500?0:1)}).on('error',()=>process.exit(1))"
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/docker-entrypoint.sh"]
 CMD ["node", "dist/index.cjs"]
