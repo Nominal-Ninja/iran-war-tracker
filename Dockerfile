@@ -36,8 +36,12 @@ ENV NODE_ENV=production \
 # tini here because tini's bundled Go stdlib was flagged with 8 CVEs (none
 # actually exploitable in a signal-forwarder's attack surface, but easier
 # to remove the package than justify each CVE).
+# gosu lets us drop from root to the nodejs user inside the entrypoint after
+# fixing ownership on the Railway-mounted volume (volumes come in owned by
+# root regardless of what the Dockerfile does at build time).
 RUN apt-get update && apt-get install -y --no-install-recommends \
       dumb-init \
+      gosu \
       ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -64,7 +68,11 @@ COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
-COPY --from=builder --chown=nodejs:nodejs /app/server/seed.ts ./server/seed.ts
+# Copy the whole server/ dir (not just seed.ts) — seed.ts imports storage.ts,
+# and tsx resolves imports at runtime, so it needs the sources on disk.
+COPY --from=builder --chown=nodejs:nodejs /app/server ./server
+# tsconfig is needed so tsx can resolve the "@shared/*" path alias.
+COPY --from=builder --chown=nodejs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --chown=nodejs:nodejs docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
@@ -75,7 +83,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # (fly.toml [mounts] or `docker run -v`).
 RUN mkdir -p /data && chown nodejs:nodejs /data
 
-USER nodejs
+# NOTE: we intentionally run the entrypoint as root so it can chown the
+# Railway-mounted /data volume, then drop to `nodejs` via gosu before
+# running the actual app. This is a standard pattern for containers that
+# need to own a mounted volume at runtime.
 EXPOSE 3000
 
 # Lightweight healthcheck — hits /api/stats via node's built-in http
