@@ -1,0 +1,52 @@
+name: Deploy to Railway
+
+# Deploys on push to main AFTER ci.yml passes. Uses Railway's CLI.
+# Setup required (one-time):
+#   1. In your Railway project, grab a project token: Settings → Tokens.
+#   2. Add it as a GitHub Actions secret named RAILWAY_TOKEN.
+#   3. Railway will auto-detect the Dockerfile and use it.
+#   4. In Railway: attach a persistent Volume mounted at /data so the
+#      SQLite file survives restarts.
+#
+# To switch to Fly.io instead, replace the deploy step with:
+#   - uses: superfly/flyctl-actions/setup-flyctl@master
+#   - run: flyctl deploy --remote-only
+#     env:
+#       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    # Only deploy when CI succeeded (or when manually dispatched)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        id: deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up --service iran-war-tracker --ci
+          echo "url=$(railway domain 2>/dev/null || echo 'https://railway.app')" >> "$GITHUB_OUTPUT"
