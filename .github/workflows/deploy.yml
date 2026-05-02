@@ -49,4 +49,12 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           railway up --service iran-war-tracker --ci
-          echo "url=$(railway domain 2>/dev/null || echo 'https://railway.app')" >> "$GITHUB_OUTPUT"
+          # Extract just the URL from `railway domain` output (it may include
+          # decorative prefixes like "🚀 " that break $GITHUB_OUTPUT format).
+          RAW="$(railway domain 2>/dev/null || true)"
+          URL="$(printf '%s' "$RAW" | grep -oE 'https?://[^[:space:]]+' | head -n1)"
+          if [ -z "$URL" ]; then
+            URL="https://railway.app"
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to: $URL"
