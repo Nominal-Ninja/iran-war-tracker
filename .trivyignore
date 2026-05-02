@@ -5,14 +5,14 @@
 # Review cadence: re-check on every drizzle-kit / esbuild bump, or quarterly,
 # whichever comes first.
 #
-# --- Group: esbuild Go stdlib CVEs (8 total: 1 CRITICAL, 7 HIGH) -----------
-# Source: all 8 CVEs are in the Go standard library statically linked into
+# --- Group: esbuild Go stdlib CVEs (10 total: 1 CRITICAL, 9 HIGH) ----------
+# Source: all 10 CVEs are in the Go standard library statically linked into
 # the `esbuild` binary at node_modules/@esbuild/linux-x64/bin/esbuild.
 # esbuild is pulled in as a transitive dep of `drizzle-kit`, which the
 # runtime image invokes exactly once at container boot to apply a hand-
 # authored schema to a fresh SQLite file via `drizzle-kit push`.
 #
-# Exploitability analysis — shared across all 8 CVEs in this group:
+# Exploitability analysis — shared across all 10 CVEs in this group:
 #   - esbuild does not open network sockets at runtime in this usage
 #     (no TLS connections → crypto/tls and crypto/x509 CVEs unreachable)
 #   - esbuild does not parse TAR or ZIP archives in this usage
@@ -35,4 +35,6 @@ CVE-2025-61728  # archive/zip: excessive CPU building archive index — esbuild 
 CVE-2025-61729  # crypto/x509: DoS via crafted cert — esbuild validates no X.509 certificates
 CVE-2026-25679  # net/url: incorrect IPv6 host literal parsing — esbuild receives no untrusted URLs
 CVE-2026-32280  # crypto/x509: unbounded work during chain building — esbuild validates no X.509 certificates
+CVE-2026-32281  # crypto/x509: DoS via crafted cert chain — esbuild validates no X.509 certificates
 CVE-2026-32282  # syscall/unix: Root.Chmod follows symlinks out of root — esbuild does not chmod files at runtime
+CVE-2026-32283  # crypto/tls: panic on multiple key updates from peer — esbuild makes no TLS connections at runtime
