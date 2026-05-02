@@ -112,14 +112,34 @@ export function ConflictMap({ events }: ConflictMapProps) {
         transition: transform 0.15s ease;
         transform-origin: center center;
         will-change: transform;
+        position: relative;
       `;
       el.appendChild(dot);
 
+      // Hover-only pulse: an absolutely-positioned ring expands and fades
+      // on mouseenter, giving a subtle radar/COP feel without animating
+      // every dot all the time. Removed on mouseleave.
+      let pulseEl: HTMLDivElement | null = null;
       el.addEventListener("mouseenter", () => {
         dot.style.transform = "scale(1.3)";
+        if (pulseEl) return;
+        pulseEl = document.createElement("div");
+        pulseEl.style.cssText = `
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          border: 2px solid ${color};
+          pointer-events: none;
+          animation: cm-pulse 1.2s ease-out infinite;
+        `;
+        dot.appendChild(pulseEl);
       });
       el.addEventListener("mouseleave", () => {
         dot.style.transform = "scale(1)";
+        if (pulseEl) {
+          pulseEl.remove();
+          pulseEl = null;
+        }
       });
 
       const popupContent = `
