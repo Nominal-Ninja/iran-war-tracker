@@ -19,17 +19,6 @@ const SEVERITY_COLORS: Record<string, string> = {
   minor: "#6b7280",
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  airstrike: "✈",
-  missile: "🚀",
-  drone: "🎯",
-  ground: "⚔",
-  naval: "⚓",
-  diplomatic: "🏛",
-  humanitarian: "🏥",
-  cyber: "💻",
-};
-
 interface ConflictMapProps {
   events: Event[];
 }
@@ -100,23 +89,37 @@ export function ConflictMap({ events }: ConflictMapProps) {
       const color = SEVERITY_COLORS[event.severity] || "#6b7280";
       const size = event.severity === "critical" ? 14 : event.severity === "major" ? 11 : 8;
 
-      // Create custom marker element
+      // Two-layer marker: MapLibre owns the outer element's `transform` for
+      // map positioning (translate3d). Putting a `transform: scale(...)` on
+      // the same element overwrites that translate and snaps the marker to
+      // the map origin (top-left). The fix is to keep the outer wrapper
+      // transform-free and apply hover scaling to an inner element instead.
       const el = document.createElement("div");
       el.style.cssText = `
         width: ${size * 2}px;
         height: ${size * 2}px;
+        cursor: pointer;
+      `;
+
+      const dot = document.createElement("div");
+      dot.style.cssText = `
+        width: 100%;
+        height: 100%;
         border-radius: 50%;
         background: ${color};
         border: 2px solid rgba(255,255,255,0.3);
-        cursor: pointer;
         box-shadow: 0 0 ${size}px ${color}80;
         transition: transform 0.15s ease;
+        transform-origin: center center;
+        will-change: transform;
       `;
+      el.appendChild(dot);
+
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.3)";
+        dot.style.transform = "scale(1.3)";
       });
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
+        dot.style.transform = "scale(1)";
       });
 
       const popupContent = `
